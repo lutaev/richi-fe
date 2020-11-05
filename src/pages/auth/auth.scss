@@ -1,0 +1,28 @@
+@import '../../variables';
+
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  form {
+    margin: 15px 0;
+    padding: 20px;
+    border: 1px solid $gray;
+
+    label {
+      display: flex;
+      margin: 20px;
+    }
+
+    input {
+      width: 300px;
+    }
+  }
+
+  .switch-msg {
+    color: #3e3e3e;
+    cursor: pointer;
+  }
+}
