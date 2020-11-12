@@ -1,0 +1,13 @@
+@import '../../variables';
+
+.header {
+  padding: 20px;
+  background-color: $bg-primary;
+  color: #ffffff;
+  display: flex;
+  justify-content: flex-end;
+
+  .auth-action {
+    cursor: pointer;
+  }
+}

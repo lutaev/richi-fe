@@ -1,4 +1,7 @@
-html, body, #root {
+@import '@material/theme/dist/mdc.theme.css';
+@import '@rmwc/theme/theme.css';
+
+html, body, #root, #root > div {
   height: 100%;
 }
 
@@ -18,6 +21,7 @@ code {
 
 .page {
   width: 100%;
+  box-sizing: border-box;
   padding: 30px;
   color: #2a2a2a;
 }

@@ -1,7 +1,10 @@
 import request from 'utils/request';
+import cookies from "browser-cookies";
 
-export const signIn = (phone, password) => request.post('/signin', { phone, password });
+export const register = (data) => request.post('/register', data);
 
-export const login = (phone, password) => request.post('/login', { phone, password });
+export const login = (data) => request.post('/login', data);
 
-export const list = () => request.get('/list');
+export const list = () => request.get('/user/list');
+
+export const getProfile = () => request.get('/user/me');
