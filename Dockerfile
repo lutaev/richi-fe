@@ -1,16 +1,18 @@
 FROM nginx:1.19.4-alpine
 
-RUN apk update
+ARG REACT_APP_API_URL
 
-RUN apk add nodejs
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
 
-RUN apk add yarn
+RUN apk update && apk add nodejs && apk add yarn
 
-COPY . ./app
+WORKDIR /app
+
+COPY . .
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-RUN cd app && ls && yarn install && yarn build
+RUN yarn install && yarn build
 
 CMD ["nginx","-g","daemon off;"]
 
