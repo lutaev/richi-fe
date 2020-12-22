@@ -4,7 +4,7 @@ import { navigate } from 'hookrouter';
 import get from 'lodash/get';
 
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json'
   }
@@ -23,7 +23,6 @@ instance.interceptors.response.use(
   err => {
     const { response } = err;
     if (response.status === 401) {
-      debugger;
       cookies.erase('access_token');
       navigate('/auth');
     }

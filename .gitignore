@@ -1,6 +1,8 @@
 build
 
 .env
+nginx.conf
+nginx.mac.conf
 
 # libraries
 node_modules

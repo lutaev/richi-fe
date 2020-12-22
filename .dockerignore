@@ -2,6 +2,7 @@ build
 node_modules
 
 .env
+nginx.mac.conf
 .dockerignore
 Dockerfile
 README.md
