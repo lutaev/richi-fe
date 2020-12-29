@@ -1,0 +1,56 @@
+sudo: required
+
+language: node_js
+
+python:
+  - "3.4"
+  - "pypy-5.3.1"
+
+node_js:
+  - '13'
+
+services:
+  - docker
+
+before_install:
+  - gem update --system
+  - sudo apt-get install -y python3.4
+  - sudo apt-get install --upgrade -y python-pip
+  - sudo apt-get install jq
+  - sudo pip install --user virtualenv
+  # Create a virtual environment for AWS CLI
+  # - virtualenv my_py3 --python=/usr/bin/python3.4
+  - virtualenv -p python3 my_py3
+  - source my_py3/bin/activate
+  - pip install --upgrade awscli
+  - pip install --upgrade awsebcli
+  # Set AWS information
+  - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+  - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  - aws configure set default.region us-east-2
+  - aws configure set metadata_service_timeout 1200
+  - aws configure set metadata_service_num_attempts 3
+  - aws configure list
+
+script:
+  - echo "No script provided"
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker image build -t lutaev/richi-fe:latest .;
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push lutaev/richi-fe:latest;
+      ./upload_image.sh $DEPLOYMENT_BUCKET $DEPLOYMENT_ENV_NAME $DEPLOYMENT_ENV_ID $APP_NAME $DEPLOYMENT_REGION $TRAVIS_BUILD_ID;
+    fi
+
+env:
+  global:
+    - APP_NAME=richi-fe
+    - DEPLOYMENT_REGION=us-east-2
+    - DEPLOYMENT_BUCKET=elasticbeanstalk-us-east-2-929692614802
+    - DEPLOYMENT_ENV_NAME=richi-fe-env
+    - DEPLOYMENT_ENV_ID=e-sbpdjsnw9u
+    - secure: "BDn261LbnL+PfVdBf2XBB3MsFXiK4eZ9QdS2D+zyNS8bSnehNKP/Q+6MPuhiCi1G97eN/+2ugwsit2nSAuKo12hsP2kXp+uetyZ/mqB5QIdAUjyKFS39pknQz3be7zIkqaLNLGIrONRXgwFMH4Fn4z249+sDXZniDUR3MtgY0yTEHd9QFPWGi2FbVCnOQehxoei42xflLXc0rB7zRtWXX2zWv6y1rQ5AnudVEOEwQTy6iRVrJIxO9vfKkr4mEygLr9JDGRsB2AxRj8EeDSNJDEe3VTHh+ap+4Ezi3h9fXWJEOmrY5oRGsB824XCO4UUl0KyqFHRqC8hTyVl+uj/ylPpCOQ0Du+sdmSJhe2X1/Sn80PWKFEQqkBKZ5Gu7uLliJpwY9zjx5OI6hLsybXEN6Eoi5xmRXhYLRByZLVv0GsGHzEh9yBG5dDKzuxlL08mZLsjccF/LusnhUcSNRfG61wuDQbBgkVQGUZRbBfSgdfVdbbxWJtEN0QyoAafYHr/Kit8Ezsq+mqe/rJJq58auVxih1IAhNPUyW9nOcfYRR96o1HbpWXsSUFSC0bLMhyBjW56ai7NPCkNZ43///6I9eqfqNTsT3/w8dlMxeG3J0NZQQKAZyeOg7hKVs2X+yyIjF574cp5+FtBoH5V/46HJQ5oEomvyGtgYKM/iTSkBYmQ="
+    - secure: "aFjbjBfc160i9Y8CCMjYc5b23WD0evAqSatsj308gSIAdPuQlRgr71XT2E/8lei4sFLioKG39/inb3gNoCrzMjOpZMj08MrwKbFNNCyVfhkGukvdugYuatzeBtD+ss1wuwvNchhZRgLI16lnYiBu8VMTTNVdDiHNFYrAJfjV4XlTA/OKU/A6V+BXCSKZd9wa8DfMaTsy8Gx+hOg0NIKIVBCSmbYexha6yjIKdE1jBDO4GojddJP4D1onypGh0gtody2eMZesndg6VyqPUjDLnUbiXA/dkg3zw0v65q/njQJEncHBqcMFY/nqAIGmKLU8UWTy54xvI3xDHjifhJCBIibTuRgLGEGORzsr5hKg2T/ppGVmzluos2eV3tFVIg75bSvxt3h1rtEoE3nh87+1fnsa+yoPyWxjlUNIWhIo5Q/l40JLks61unW+chpzqChB4QGIihi7KlTt5PhU9PQ/FrfzkUFgkXZjPagHz2rZRfr1AwHEj0f1EdVrKdUvmuIi0FkbIRHKaI5x+wteUoczG2SxWdTHC/n9u+N8vfrUhsTbwV+UY4XBVLF22gs2vJtMyQfSk45w/JQYaaI+0gcPR/5uSmPKk4+N4n/RofIRBocVB7XXDD1y45JFnCvVOv8HTvdmNo6EmuZqympiqowiSxin5vMaqAWndRkgb2tQx6w="
+    - secure: "V1iwp84kNbXMz03hJAC2BcPx1qbvkrQ0eXHTZbtDZB+ItEOaOKo/fYlsXAaNXoRO4oLHQrdaWRppA/+xxWEErQHNUjyvgk6UpJkoI6Hq8lkqHq5wRPNNTltXUfqjUUWs6z5UWTeV7vDY9qz6P8i6Zx7ULFl1CIrIR+Aaky4ZhUD4k6bpO5mhoOy2zGN5loCDdYDKmXlLPCTdte2xy/eefHQXFuox38Ep7ZfnJmmlo7ztv7wvssctB7Q7EuPm/4z439mpZRg+RH22piJ0REjKkXOaQCB9sd1w3JFnMobSGu5ioDtpcSSJ/G3xNBaPMZdVMZX1EjXQg1FLzcz33Gdw/s3Ewv9kQqtshjOPp61nM/XtlkzMsih494CMYRItI8OZP+KYwnxJgsDW8GQLQapkIN0mQrTQtctxOMH83ARtC4uHC1n+z8Mt8LoY3B5ziiPEh1GqqPmZNq4AYl7DJilx4CioXZ/d2cCDg1YM3q96ROvseANiLMoOfwN3ECQELgozvNgRkEmL+eOiB37zTZ/RuQ8wYuWb8yN5/B6Lx1hbj6Pbcy2uYtf9QYjwHhO60Sfdk/pw8Mj33baoUSFT5P6ewWa9DsyntL8LT2t3QnnPUWEOlOU7TMf302VhE7sUdemSjBq9r44jSMW+uEBScHDNIDxH82EfOJVDb1DU1uoBffQ="
+    - secure: "Dhl7BIySsy9r7KRhsgRTgNAlubRtt/SOkirKRPUJjhw0BEop5hGRU7H4lIgpwAK+XgX6uVJAHY7UDEMDwX3A58vslalF02hC/9m0/dbC/r4VTMNIWQEUHjaH+r9wQ5m8kVhr2Dq+MIVLruLM4w11095m6wgSkaHah0Zi0nMTLPhWvjoVvJVu2eDWvjnZrrOTAcs6snjtX7bI5iEtSbE0v7/tnVMrCv1VAOJt2fzCfHH3E3sBewPUDsI4esPVWs/di2x8hfaJKlL/6wh6SrrJ4nNKUSAccNd24Zq6HOWRa1m+3HE74v4mqes+XmCft4ejsjP8XEEy+HTyynN4Zz32feZCMSJjiY786LyBTzJgXPD3NjB3mIYZ8W2L+2kRC3bjOTxridN8psV1XS+RPdA7TbvhlNAhOjr8wFEf5jUnxMhmA82n1o5lzgVhe3kw+2nF6sbewTcgK9AzHelHFrblyN62Mbfnvb0UyBsaHifDWC1Eubi2LKpPLTb33UXuvTRp+TVCDq+0BbHJbNpqEV9pUEfn9M8lWGQ/pYQWcuvM9NjSdfn9zvR01LfF92nkaVRKYDEmCra3PYogNT7zONVvoSwYyLXFoyZA4c8TlUbn82rauKVTgidNX9yq5eZX9Z5orwQFYVvOWLKruy03vKrQAda1LMet63vA3GtHJw92q08="

@@ -1,6 +1,7 @@
 build
 node_modules
 
+upload_image.sh
 .env
 nginx.mac.conf
 .dockerignore
