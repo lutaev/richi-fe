@@ -17,7 +17,7 @@ const Auth = () => {
   }
 
   const isLogin = form === 'login';
-  const switchMessage = isLogin ? 'Sign Up' : 'Sign In';
+  const switchMessage = isLogin ? 'Sign Up (test ci)' : 'Sign In (test ci)';
 
   return (
     <div className="page auth-page">
