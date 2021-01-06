@@ -1,0 +1,55 @@
+sudo: required
+
+language: node_js
+
+python:
+  - "3.4"
+  - "pypy-5.3.1"
+
+node_js:
+  - '14'
+
+services:
+  - docker
+
+before_install:
+  - gem update --system
+  - sudo apt-get install -y python3.4
+  - sudo apt-get install --upgrade -y python-pip
+  - sudo apt-get install jq
+  - sudo pip install --user virtualenv
+  # Create a virtual environment for AWS CLI
+  # - virtualenv my_py3 --python=/usr/bin/python3.4
+  - virtualenv -p python3 my_py3
+  - source my_py3/bin/activate
+  - pip install --upgrade awscli
+  - pip install --upgrade awsebcli
+  # Set AWS information
+  - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+  - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  - aws configure set default.region us-east-2
+  - aws configure set metadata_service_timeout 1200
+  - aws configure set metadata_service_num_attempts 3
+  - aws configure list
+
+before_script:
+  - npm install
+
+script:
+  - npm run test
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker image build -t lutaev/richi-fe:latest .;
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push lutaev/richi-fe:latest;
+    ./upload_image.sh $DEPLOYMENT_BUCKET $DEPLOYMENT_ENV_NAME $DEPLOYMENT_ENV_ID $APP_NAME $DEPLOYMENT_REGION $TRAVIS_BUILD_ID;
+    fi
+
+env:
+  global:
+    - APP_NAME=richi-fe
+    - DEPLOYMENT_REGION=us-east-2
+    - DEPLOYMENT_BUCKET=elasticbeanstalk-us-east-2-929692614802
+    - DEPLOYMENT_ENV_NAME=richi-fe-env
+    - DEPLOYMENT_ENV_ID=e-sbpdjsnw9u
